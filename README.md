@@ -1,4 +1,4 @@
-# OpenGl-Maze
+# OpenGL_Maze
 
 ## 1. 개요
 openGL 을 이용하여 만든 간단한 게임입니다.
