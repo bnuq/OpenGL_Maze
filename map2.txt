@@ -1,0 +1,8 @@
+const int mapSize = 5;
+int givenMap[mapSize][mapSize] = {
+    {1, 0, 0, 0, 0},
+    {1, 0, 1, 1, 0},
+    {1, 0, 1, 0, 0},
+    {1, 0, 0, 0, 1},
+    {0, 0, 1, 0, 0}
+};

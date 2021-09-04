@@ -1,31 +1,29 @@
 #include <GL/glut.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
+
+//#include <GL/gl.h>
+//#include <GL/glu.h>
 
 #include <stack>
 #include <iostream>
 
-#include "CubeCoor.cpp"
+#include "CubeCoor.h"
 
 /*
     정사각형 모양의 2차원 int 배열을 바탕으로 맵을 그립니다.
-    한변의 길이는 SIZE 라는 상수로 설정합니다.
-    그리고자 하는 맵을 SIZE 에 맞게 입력합니다.
+    한변의 길이는 mapSize 라는 상수로 설정합니다.
+    그리고자 하는 맵을 mapSize 에 맞게 입력합니다.
     0 은 지나갈 수 있는 점, 
     1 은 지나갈 수 없는 점을 의미합니다.
 */
-const int SIZE = 10;
-int givenMap[SIZE][SIZE] = {
-    {0, 0, 0, 1, 0, 1, 0, 0, 0, 0},
-    {1, 0, 0, 1, 0, 1, 0, 1, 1, 0},
-    {0, 0, 0, 1, 0, 1, 0, 1, 0, 0},
-    {0, 1, 0, 0, 0, 1, 0, 0, 0, 1},
-    {0, 0, 1, 0, 0, 1, 1, 1, 0, 0},
-    {0, 0, 1, 1, 0, 0, 0, 0, 0, 0},
-    {0, 0, 1, 0, 0, 0, 0, 1, 1, 1},
-    {0, 0, 1, 0, 0, 0, 0, 1, 1, 1},
-    {0, 0, 1, 0, 0, 0, 0, 0, 0, 1},
-    {0, 0, 1, 0, 0, 0, 0, 1, 0, 1}
+const int mapSize = 7;
+int givenMap[mapSize][mapSize] = {
+    {1, 1, 0, 0, 1, 0, 0},
+    {1, 0, 0, 0, 0, 0, 0},
+    {0, 0, 1, 0, 0, 0, 0},
+    {1, 0, 0, 0, 1, 0, 1},
+    {0, 0, 1, 0, 0, 0, 0},
+    {1, 0, 0, 1, 0, 0, 0},
+    {0, 0, 0, 0, 0, 1, 0}
 };
 
 
@@ -35,11 +33,11 @@ int givenMap[SIZE][SIZE] = {
     -90도 회전 변환한 배열을 담기 위한 2차원 배열 processedMap 을 선언합니다.
     그리고 주어진 2차원 배열을 -90도 회전 변환시켜주는 함수 rotateMinus90 를 정의합니다.
 */
-int processedMap[SIZE][SIZE];
-void rotateMinus90(int source[SIZE][SIZE], int dest[SIZE][SIZE]) {
-    for(int j = 0; j < SIZE; j++) {
-        for(int i = SIZE-1; i >= 0; i--) {
-            dest[j][SIZE-1 - i] = source[i][j];
+int processedMap[mapSize][mapSize];
+void rotateMinus90(int source[mapSize][mapSize], int dest[mapSize][mapSize]) {
+    for(int j = 0; j < mapSize; j++) {
+        for(int i = mapSize-1; i >= 0; i--) {
+            dest[j][mapSize-1 - i] = source[i][j];
         }
     }
 }
@@ -72,7 +70,7 @@ void rotateMinus90(int source[SIZE][SIZE], int dest[SIZE][SIZE]) {
 */
 bool on_going = false;
 CubeCoor Player(0, 0, 0);
-CubeCoor Goal(SIZE-1, SIZE-1, 0);
+CubeCoor Goal(mapSize-1, mapSize-1, 0);
 std::stack<int> commands;
 std::stack<int> inverse;
 bool showLine = false;
@@ -101,8 +99,8 @@ void MyDisplay() {
     */
     glPointSize(10);
     glBegin(GL_POINTS);
-        for(int i = 0; i < SIZE; i++) {
-            for(int j = 0; j < SIZE; j++) {
+        for(int i = 0; i < mapSize; i++) {
+            for(int j = 0; j < mapSize; j++) {
                 if(processedMap[i][j] == 0) glColor3f(0.3, 0.3, 1.0);
                 else glColor3f(1.0, 0.3, 0.3);
                 glVertex2d(i, j);
@@ -152,7 +150,7 @@ bool checkValidMove(int value) {
     // value = 입력된 방향키
     switch(value) {
         case GLUT_KEY_UP:
-            if(y == SIZE-1 || processedMap[x][y+1] == 1) return false;
+            if(y == mapSize-1 || processedMap[x][y+1] == 1) return false;
             else return true;
 
         case GLUT_KEY_DOWN:
@@ -164,7 +162,7 @@ bool checkValidMove(int value) {
             else return true;
 
         case GLUT_KEY_RIGHT:
-            if(x == SIZE-1 || processedMap[x+1][y] == 1) return false;
+            if(x == mapSize-1 || processedMap[x+1][y] == 1) return false;
             else return true;
 
         default:
@@ -180,9 +178,9 @@ bool checkValidMove(int value) {
 */
 bool findTheAnswer(std::stack<int>& st) {
     // processedMap 을 복사
-    int checkTheRoute[SIZE][SIZE];
-    for(int i = 0; i < SIZE; i++) {
-        for(int j = 0; j < SIZE; j++)
+    int checkTheRoute[mapSize][mapSize];
+    for(int i = 0; i < mapSize; i++) {
+        for(int j = 0; j < mapSize; j++)
             checkTheRoute[i][j] = processedMap[i][j];
     }
 
@@ -206,9 +204,9 @@ bool findTheAnswer(std::stack<int>& st) {
         골인 지점이 출발 지점의 우상향 방향에 있기 때문에,
         위로 가는 것과 오른쪽으로 가는 것에 우선순위를 두었다.
     */
-    while(cx != SIZE-1 || cy != SIZE-1) {
+    while(cx != mapSize-1 || cy != mapSize-1) {
         // 위로 갈 수 있다
-        if(cy+1 < SIZE && checkTheRoute[cx][cy+1] == 0) {
+        if(cy+1 < mapSize && checkTheRoute[cx][cy+1] == 0) {
             /*
                 해당 방향으로 이동 시, 그러한 이동을 지시하는 화살표 키 값을 스택에 저장한다.
             */
@@ -218,7 +216,7 @@ bool findTheAnswer(std::stack<int>& st) {
         }
 
         // 오른쪽으로 갈 수 있다
-        else if(cx+1 < SIZE && checkTheRoute[cx+1][cy] == 0) {
+        else if(cx+1 < mapSize && checkTheRoute[cx+1][cy] == 0) {
             st.push(GLUT_KEY_RIGHT);
             cx++;
             checkTheRoute[cx][cy] = 2; // 오른쪽으로 이동
@@ -466,7 +464,7 @@ int main(int argc, char** argv) {
     glLoadIdentity();
 
     // 2차원 배열의 범위만은 뷰 포트에 표현했다.
-    glOrtho(-1, SIZE, -1, SIZE, -1, 1);
+    glOrtho(-1, mapSize, -1, mapSize, -1, 1);
 
 
     /*
